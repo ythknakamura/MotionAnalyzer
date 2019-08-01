@@ -62,7 +62,7 @@ def makeGraph(targetNum, info, show=True):
         safedelete(Common.GraphPng(target))
         Graphs2.Run(target, show)
 
-def doAll(targetNum, info, show):
+def doAll(targetNum, info):
     for i in [0,1,2,3]:
         step_cmd[i](targetNum, info)
         info = target_info(targetNum)
