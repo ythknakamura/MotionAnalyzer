@@ -9,7 +9,7 @@ import Crop
 import AutoAnalyze
 import Graphs2
 
-NUM_OF_INFO = 6
+stepCmds = []
 
 def safedelete(file):
     if path.exists(file):
@@ -19,64 +19,74 @@ def deleteFileIn(dir):
     for file in glob.glob(dir +"/*"):
         os.remove(file)
 
+def checkInfo(targetNum, checklist):
+    info = targetInfo(targetNum)
+    for c in checklist:
+        if not info[c]:
+            print("まずは「{0}」を!".format(stepCmds[0][1]))
+            return False
+    return True
 
-def toStill(targetNum, info):
+def toStill(targetNum):
     deleteFileIn(os.path.join(targets[targetNum], "raw"))
     MovieToStillImage.Run(targetFiles[targetNum])
+stepCmds.append((toStill, "動画から静止画を作成"))
 
-def cropping(targetNum, info):
+def cropping(targetNum):
     target = targets[targetNum]
-    if not info[0]:
-        print("まずは{0}を!".format(stepStr[0]))
-    else:
+    if checkInfo(targetNum, [0]):
         deleteFileIn(os.path.join(target, "crop"))
         safedelete(Common.CalibrationFile(target))
         Crop.Run(target)
+stepCmds.append((cropping, "解析範囲の指定"))
 
-def autoAnalyze(targetNum, info):
+def autoAnalyze(targetNum):
     target = targets[targetNum]
-    if not info[0]:
-        print("まずは{0}を!".format(stepStr[0]))
-    elif not info[1]:
-        print("まずは{0}を!".format(stepStr[1]))
-    else:
+    if checkInfo(targetNum, [0, 1]):
         deleteFileIn(os.path.join(target, "out"))
         safedelete(Common.MeasureFile(target))
         safedelete(Common.DetectedMontage(target))
         safedelete(Common.DetectedMovie(target))
         AutoAnalyze.Run(target)
+stepCmds.append((autoAnalyze, "画像認識で自動計測"))
 
-def makeGraph(targetNum, info, show=True):
+def makeGraph(targetNum, show=True):
     target = targets[targetNum]
-    if not info[0]:
-        print("まずは{0}を!".format(stepStr[0]))
-    elif not info[1]:
-        print("まずは{0}を!".format(stepStr[1]))
-    elif not info[2]:
-        print("まずは{0}を!".format(stepStr[2]))
-    else:
+    if checkInfo(targetNum, [0, 1, 2]):
         safedelete(Common.GraphFile(target))
         safedelete(Common.GraphPng(target))
         Graphs2.Run(target, show)
+stepCmds.append((makeGraph, "グラフデータの作成"))
 
-def doAll(targetNum, info):
+def doAll(targetNum):
     for i in [0, 1, 2, 3]:
-        stepCmd[i](targetNum, info)
-        info = targetInfo(targetNum)
+        stepCmds[i][0](targetNum)
+stepCmds.append((doAll, "順に全部やる"))
 
-def clear(targetNum, info):
+def clear(targetNum):
     result = input("対象の解析成果を破棄します。[y/N]")
     if result == "y":
         shutil.rmtree(targets[targetNum])
+stepCmds.append((clear, "作成物を破棄"))
 
+def toStillforAll(targets):
+    for i, _ in enumerate(targets):  
+        if not targetInfo(i)[0]:
+            toStill(i)
 
-stepStr = ["動画から静止画を作成", "静止画のクロッピング", "画像認識で自動計測", "グラフデータの作成", "順に全部やる", "作成物を破棄"]
-stepCmd = [toStill, cropping, autoAnalyze, makeGraph, doAll, clear]
+def plotAllData(targets):
+    ts = [target for i, target in enumerate(targets) if targetInfo(i)[3] ]
+    Graphs2.PlotAll(ts)
 
+def twoThreeToAll(targets):
+    for i, _ in enumerate(targets):
+        if targetInfo(i)[1]:
+            autoAnalyze(i)
+            makeGraph(i, False)
 
 def targetInfo(targetNum):
     target = targets[targetNum]
-    info = [False]*(NUM_OF_INFO)
+    info = [False] * len(stepCmds)
     info[0] = len(glob.glob(target + "/raw/*.jpg")) != 0
     info[1] = len(glob.glob(target + "/crop/*.jpg")) != 0 and path.exists(Common.CalibrationFile(target))
     info[2] = len(glob.glob(target + "/out/*.jpg")) != 0 and path.exists(Common.MeasureFile(target))
@@ -89,35 +99,17 @@ def startAnalyze(targetNum):
         print("\n\n\n*************************************\n")
         print("解析対象のファイル:{0}\n".format(targets[targetNum]))
         info = targetInfo(targetNum)
-        for i in range(NUM_OF_INFO):
-            print("{0}:{1}\t{2}".format(i, stepStr[i], "[完了]" if info[i] else ""))
+        for i, cmd in enumerate(stepCmds):
+            print("{0}:{1}\t{2}".format(i, cmd[1], "[完了]" if info[i] else ""))
         n = input("何をする? : ")
 
-        if n.isdigit() and  0 <= int(n) < NUM_OF_INFO:
-            stepCmd[int(n)](targetNum, info)
+        if n.isdigit() and  0 <= int(n) < len(stepCmds):
+            stepCmds[int(n)][0](targetNum)
             if int(n)==4:
                 return
         else:
             print("終了します")
             return
-
-def toStillforAll(targets):
-    for i, _ in enumerate(targets):
-        info =  targetInfo(i)
-        if not info[0]:
-            toStill(i, info)
-
-def plotAllData(targets):
-    ts = [target for i, target in enumerate(targets) if targetInfo(i)[3] ]
-    Graphs2.PlotAll(ts)
-
-def twoThreeToAll(targets):
-    for i, _ in enumerate(targets):
-        info =  targetInfo(i)
-        if info[1]:
-            autoAnalyze(i, info)
-            makeGraph(i,info, False)
-
 
 while(True):
     targetFiles = glob.glob('*.MOV')
