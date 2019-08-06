@@ -16,7 +16,7 @@ def getRectangle(image, thresh):
     _, im_thre = cv2.threshold(im_mask, thresh, 255, cv2.THRESH_BINARY)
    
     if(cv2.__version__[0] == "3"):
-        _contours, _ = cv2.findContours(
+        _, contours, _ = cv2.findContours(
         im_thre, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     else:
         contours, _ = cv2.findContours(
