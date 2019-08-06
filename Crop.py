@@ -7,13 +7,13 @@ from PIL import Image, ImageTk
 import Common
 
 def CropAll(target, files, cropRange):
-     for file in files:
-            basename =  os.path.basename(file)
-            rawName   = os.path.join(target, os.path.join("raw",basename))
-            cropName  = os.path.join(target, os.path.join("crop", basename))
-            cropImage = Image.open(rawName).crop(cropRange)
-            cropImage.save(cropName)
-            print(cropName)
+    for file in files:
+        basename = os.path.basename(file)
+        rawName = os.path.join(target, os.path.join("raw",basename))
+        cropName = os.path.join(target, os.path.join("crop", basename))
+        cropImage = Image.open(rawName).crop(cropRange)
+        cropImage.save(cropName)
+        print(cropName)
 
 class Application(tk.Frame):
     def __init__(self, target, master=None):
@@ -40,8 +40,8 @@ class Application(tk.Frame):
 
 
     def create_wigets(self):
-        imageWidth = self.image_tk.width();
-        imageHeight = self.image_tk.height();
+        imageWidth = self.image_tk.width()
+        imageHeight = self.image_tk.height()
 
         buttonFrame = tk.Frame(self.master, bd=2)
         buttonFrame.pack(fill=tk.X)
@@ -171,13 +171,10 @@ class Application(tk.Frame):
     def setZeroPoint(self, event):
         self.zero = (event.x * self.sample, event.y * self.sample)
         self.showCropRange()
-        pass
 
     def setOnePoint(self, event):
         self.one = (event.x * self.sample, event.y * self.sample)
         self.showCropRange()
-        pass
-
 
 def Run(target):
     root = tk.Tk()

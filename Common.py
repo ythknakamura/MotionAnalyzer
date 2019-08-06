@@ -23,9 +23,6 @@ MAKE_DETECTED_MONTAGE_STEP = 24*2
 MAKE_DETECTED_MOVIE = True
 
 
-
-
-
 def CalibrationFile(target):
     return os.path.join(target, "%s_calibration.txt"%target)
 
@@ -43,4 +40,3 @@ def GraphFile(target):
 
 def GraphPng(target):
     return os.path.join(target, "%s_graph.png"%target)
-
