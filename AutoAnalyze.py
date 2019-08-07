@@ -31,7 +31,7 @@ def Run(target):
         print("*** エラー *** : Cropが完了していない")
         quit()
 
-    makeMontage = Common.MAKE_DETECTED_MONTAGE_STEP is not None
+    makeMontage = Common.MONTAGE_STEP != 0
 
     with open(Common.CalibrationFile(target), mode='r') as f:
         zeroPointX = int(f.readline().split('\t')[0])
@@ -91,7 +91,7 @@ def Run(target):
                 rawImage = cv2.line(rawImage, (rec[0][0], rec[0][1]), (rec[2][0], rec[2][1]), (0,0,255), thickness=2)
                 rawImage = cv2.line(rawImage, (rec[1][0], rec[1][1]), (rec[3][0], rec[3][1]), (0,0,255), thickness=2)
             cv2.imwrite("%s/out/%s" % (target, os.path.basename(file)), rawImage)
-            if makeMontage and i % Common.MAKE_DETECTED_MONTAGE_STEP==0:
+            if makeMontage and i % Common.MONTAGE_STEP == 0:
                 mask = np.zeros_like(montage)
                 mask = cv2.fillConvexPoly(mask, np.array([rec]), color=(255, 255, 255))
                 montage = np.where(mask==255, rawImage, montage)

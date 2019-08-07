@@ -11,7 +11,7 @@ def Run(fnameext):
     os.makedirs(os.path.join(target, "out"), exist_ok=True)
 
     try:
-        if Common.TRANSPOSE_RAW is None:
+        if Common.TRANSPOSE_RAW == "":
             subprocess.run(["ffmpeg", "-i", fnameext,
                 "-f", "image2", "-vcodec", "mjpeg", target+"/raw/%04d.jpg"], check=True)
         else:

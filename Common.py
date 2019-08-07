@@ -1,26 +1,39 @@
 import os
+import json
 
-### 入力動画のfps
-FPS = 240
+SETTING_JSON = "setting.json"
+
+setting = {
+    "fps" : 240,                    # 入力動画のfps
+    "makeDetectedMovie" : True,     # 自動検出後の確認動画を作るかどうか
+    #"transposeRaw" : "hflip",       # 入力動画に回転をかけるかどうか
+    "transposeRaw" : "transpose=2",
+    "sampleOnCrop" : 2,             # Cropの際の画像の縮小率
+    "motageStep" : 48,              # モンタージュの作成間隔 
+    }
+
+def SaveSetting():
+    f = open(SETTING_JSON, "w")
+    json.dump(setting, f, indent=4)
+
+def LoadSetting():
+    global setting
+    if os.path.exists(SETTING_JSON):
+        f = open(SETTING_JSON, "r")
+        setting = json.load(f)
+    else:
+        SaveSetting()
+    print("### MotionAnalyzer")
+    print(json.dumps(setting,indent=4))
+    print("##################\n\n")
 
 
-### 入力動画に回転をかけるかどうか
-TRANSPOSE_RAW = None
-TRANSPOSE_RAW = "hflip"
-#TRANSPOSE_RAW = "transpose=2"
-
-
-### Cropの際の画像の縮小率
-SAMPLE_ON_CROP = 2
-
-
-### モンタージュの作成間隔 
-#MAKE_DETECTED_MONTAGE_STEP = None
-MAKE_DETECTED_MONTAGE_STEP = 24*2
-
-
-### 自動検出後の確認動画を作るかどうか
-MAKE_DETECTED_MOVIE = True
+LoadSetting()
+FPS = setting["fps"]
+MAKE_DETECTED_MOVIE = setting["makeDetectedMovie"]
+TRANSPOSE_RAW = setting["transposeRaw"]
+SAMPLE_ON_CROP = setting["sampleOnCrop"]
+MONTAGE_STEP = setting["motageStep"]
 
 
 def CalibrationFile(target):

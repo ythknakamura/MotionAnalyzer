@@ -131,5 +131,3 @@ while(True):
         plotAllData(targets)
     else:
         exit()
-
- 
