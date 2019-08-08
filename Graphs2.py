@@ -23,7 +23,8 @@ def windowLeastSquare(tlist, xlist):
         A = ((x2*t0 - x0*t2)*(t2*t0 - t1*t1) - (x1*t0-x0*t1)*(t3*t0-t2*t1)) / D
         B = ((x1*t0 - x0*t1)*(t4*t0 - t2*t2) - (x2*t0-x0*t2)*(t3*t0-t2*t1)) / D
         vlist[n] = B + 2*A*tlistn
-    return vlist
+        alist[n] = 2*A
+    return vlist, alist
 
 def PlotAll(targets):
     _, axes = plt.subplots(2, 2, figsize=(15, 8), sharex=True, gridspec_kw={'hspace':0.2})
@@ -82,11 +83,13 @@ def Run(target, show):
             rlist[i] = rlist[i-1] + dr
 
 
-        vlist = windowLeastSquare(tlist, xlist)
-        vlist = (np.vectorize(lambda v: v if -0.5 < v < 5 else np.nan))(vlist)
+        vlist, alist = windowLeastSquare(tlist, xlist)
+        slist, _     = windowLeastSquare(tlist, rlist)
 
-        slist = windowLeastSquare(tlist, rlist)
+        vlist = (np.vectorize(lambda v: v if -0.5 < v < 5 else np.nan))(vlist)
+        alist = (np.vectorize(lambda a: a if -10 < a < 2 else np.nan))(alist)
         slist = (np.vectorize(lambda s: s if -3 < s < 3 else np.nan))(slist)
+
 
         fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True, gridspec_kw={'hspace':0.2})
 

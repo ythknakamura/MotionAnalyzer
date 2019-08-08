@@ -31,7 +31,7 @@ def Run(target):
         print("*** エラー *** : Cropが完了していない")
         quit()
 
-    makeMontage = Common.MONTAGE_STEP != 0
+    makeMontage = Common.MONTAGE_STEP > 0
 
     with open(Common.CalibrationFile(target), mode='r') as f:
         zeroPointX = int(f.readline().split('\t')[0])

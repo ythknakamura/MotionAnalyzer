@@ -7,7 +7,7 @@ import Common
 import MovieToStillImage
 import Crop
 import AutoAnalyze
-import Graphs2
+import Graphs3
 
 stepCmds = []
 
@@ -54,8 +54,10 @@ def makeGraph(targetNum, show=True):
     target = targets[targetNum]
     if checkInfo(targetNum, [0, 1, 2]):
         safedelete(Common.GraphFile(target))
-        safedelete(Common.GraphPng(target))
-        Graphs2.Run(target, show)
+        safedelete(Common.GraphPng(target, 0))
+        safedelete(Common.GraphPng(target, 1))
+        safedelete(Common.GraphPng(target, 2))
+        Graphs3.Run(target, show)
 stepCmds.append((makeGraph, "グラフデータの作成"))
 
 def doAll(targetNum):
