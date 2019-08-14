@@ -27,6 +27,64 @@ def windowLeastSquare(tlist, xlist):
         d2[n] = 2*A
     return d1, d2
 
+def MakePltFile(targets):
+    lineStyles = " ".join([str(1) for _ in targets])
+    targetList = " ".join(targets)
+    pltString = """
+reset
+
+##############################################
+### gnuplot に読み込ませるためのスクリプト ###
+##############################################
+
+
+### 表示したいもの以外の行頭に#をつける
+###################################################
+#tate_label = "x [m]"		;tate_rownum = 2
+tate_label = "v [m/s]"		;tate_rownum = 3
+#tate_label = "a [m/s2]"	;tate_rownum = 4
+###################################################
+
+
+###　プロットの設定
+targets   = "{targetList}"
+line_styles = "{lineStyles}"
+
+### 線種の定義
+set style line 1 lw 2 lc rgb "black"
+set style line 2 lw 2 lc rgb "red"
+set style line 3 lw 2 lc rgb "blue"
+set style line 4 lw 2 lc rgb "green"
+set style line 5 lw 2 lc rgb "orange"
+
+
+set grid		# グリッドを表示
+set zeroaxis		# 縦横軸の表示
+
+###################################################
+### 以下、編集不要
+
+set term qt
+num = words(targets)
+files =""
+do for [id=1:num]{{
+    files = files . sprintf("%s/%s_graph.txt ", word(targets, id),  word(targets, id))
+}}
+set xlabel "time [s]"
+set ylabel tate_label
+plot for[id=1:num] word(files, id) us 1:tate_rownum w l ls word(line_styles, id) ti word(targets, id)
+
+set term push
+set term pngcairo
+set output "gnuplot_graph.png"
+replot
+set output
+set term pop
+""".format(targetList=targetList, lineStyles=lineStyles)
+    print(pltString)
+    with open("gnuplotgraph.plt", mode='w') as f:
+        f.write(pltString)
+
 def PlotAll(targets):
     graphElements = [
             (1, "x [m]"), 

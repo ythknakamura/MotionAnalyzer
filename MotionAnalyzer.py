@@ -78,7 +78,8 @@ def toStillforAll(targets):
 
 def plotAllData(targets):
     ts = [target for i, target in enumerate(targets) if targetInfo(i)[3] ]
-    Graphs3.PlotAll(ts)
+    #Graphs3.PlotAll(ts)
+    Graphs3.MakePltFile(ts)
 
 def twoThreeToAll(targets):
     for i, _ in enumerate(targets):
