@@ -28,44 +28,36 @@ def windowLeastSquare(tlist, xlist):
     return d1, d2
 
 def PlotAll(targets):
-    _, axes = plt.subplots(2, 2, figsize=(15, 8), sharex=True, gridspec_kw={'hspace':0.2})
-
+    graphElements = [
+            (1, "x [m]"), 
+            (2, "v [m/s]"),
+            (3, "a [m/s2]"),
+            (4, "y [m]"),
+            (5, "angle [360 deg]"), 
+            (6, "omega [360 deg/s]")]
+   
+    axes = {}
+    figs = {}
+    for id, ylabel in graphElements:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        axes[id] = ax
+        figs[id] = fig
+      
     for target in targets:
         with open(Common.GraphFile(target), "r") as graphfile:
             data = np.loadtxt(graphfile, delimiter="\t")
+            yoko_list = data[:, 0]
+            for id, ylabel in graphElements:
+                tate_list= data[:, id]
+                axes[id].plot(yoko_list, tate_list, label=target)
 
-            tlist = data[:, 0]
-            xlist = data[:, 1]
-            vlist = data[:, 2]
-            alist = data[:, 3]
-            ylist = data[:, 4]            
-            rlist = data[:, 5]
-            olist = data[:, 6]
-
-            axes[0, 0].plot(tlist, xlist)
-            axes[0, 0].grid(True)
-            axes[0, 0].set_ylabel('x [m]')
-
-            axes[1, 0].plot(tlist, vlist, label=target)
-            axes[1, 0].grid(True)
-            axes[1, 0].set_ylabel('v [m/s]')
-
-            axes[0, 1].plot(tlist, rlist)
-            axes[0, 1].grid(True)
-            axes[0, 1].set_ylabel('angle [360 deg]')
-
-            axes[1, 1].plot(tlist, slist, label=target)
-            axes[1, 1].grid(True)
-            axes[1, 1].set_ylabel('angle [360 deg/s]')
-
-
-            axes[1, 0].set_xlabel('time [s]')
-            axes[1, 0].legend()
-            axes[1, 1].set_xlabel('time [s]')
-            axes[1, 1].legend()
-
-    plt.savefig("graphs.png")
-    plt.show()
+    for id, _ in graphElements:
+        axes[id].grid(True)
+        axes[id].set_xlabel('time [s]')
+        axes[id].set_ylabel(ylabel)
+        axes[id].legend()
+        figs[id].tight_layout()
+        figs[id].savefig("graphs%d.png"%id)
 
 def Run(target, show):
     with open(Common.MeasureFile(target), "r") as csvfile:
