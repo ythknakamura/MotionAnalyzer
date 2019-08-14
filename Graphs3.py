@@ -36,29 +36,24 @@ def PlotAll(targets):
             (5, "angle [360 deg]"), 
             (6, "omega [360 deg/s]")]
    
-    axes = {}
-    figs = {}
     for id, ylabel in graphElements:
         fig, ax = plt.subplots(figsize=(8, 6))
-        axes[id] = ax
-        figs[id] = fig
       
-    for target in targets:
-        with open(Common.GraphFile(target), "r") as graphfile:
-            data = np.loadtxt(graphfile, delimiter="\t")
-            yoko_list = data[:, 0]
-            for id, ylabel in graphElements:
+        for target in targets:
+            with open(Common.GraphFile(target), "r") as graphfile:
+                data = np.loadtxt(graphfile, delimiter="\t")
+                yoko_list = data[:, 0]
                 tate_list= data[:, id]
-                axes[id].plot(yoko_list, tate_list, label=target)
+                ax.plot(yoko_list, tate_list, label=target)
 
-    for id, _ in graphElements:
-        axes[id].grid(True)
-        axes[id].set_xlabel('time [s]')
-        axes[id].set_ylabel(ylabel)
-        axes[id].legend()
-        figs[id].tight_layout()
-        figs[id].savefig("graphs%d.png"%id)
-
+        ax.grid(True)
+        ax.set_xlabel('time [s]')
+        ax.set_ylabel(ylabel)
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig("graphs%d.png"%id)
+        fig.show()
+    
 def Run(target, show):
     with open(Common.MeasureFile(target), "r") as csvfile:
         data = np.loadtxt(csvfile, delimiter=",")
