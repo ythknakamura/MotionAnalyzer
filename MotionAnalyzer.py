@@ -115,7 +115,9 @@ def startAnalyze(targetNum):
             return
 
 while(True):
-    targetFiles = glob.glob('*.MOV')
+    exts = [".mov", ".mp4", ".avi", ".m4a", ".wmv", ".mts"]
+    targetFiles = [file for file in glob.glob('*') if path.splitext(file)[1].lower() in exts]
+    targetFiles.sort()
     targets = [t for t, _ in map(path.splitext, targetFiles)]
     for i, target in enumerate(targets):
         print("{0:3d} : {1} {2}".format(i+1, target, " [完了]" if all(targetInfo(i)[:-1]) else ""))

@@ -180,14 +180,3 @@ def Run(target):
     root = tk.Tk()
     myapp = Application(target=target, master=root)
     myapp.mainloop()
-
-if __name__ == '__main__':
-    args = sys.argv
-    if len(args) != 2:
-        print("*** エラー：「python3 %s 動画ファイル名」などと呼び出すこと！" % args[0])
-
-    else:
-        target, ext = os.path.splitext(args[1])
-        root = tk.Tk()
-        myapp = Application(target=target, master=root)
-        myapp.mainloop()
