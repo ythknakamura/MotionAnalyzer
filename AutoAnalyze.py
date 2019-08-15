@@ -52,7 +52,9 @@ def Run(target):
 
     if makeMontage:
         montage = cv2.imread(rawfiles[0], 1)
+        traject = cv2.imread(rawfiles[0], 1)
 
+    trajectPoints = []
     with open(Common.MeasureFile(target), mode='w') as f:
         for i, file in enumerate(files):
             image = cv2.imread(file, 1)
@@ -80,6 +82,7 @@ def Run(target):
                 f.write(output)
 
                 rec = np.array([box[i][xy]+shift[xy] for i in [0,1,2,3] for xy in [0, 1]], dtype=np.int32).reshape([4,2])               
+                
             else:
                 rec = []
 
@@ -90,14 +93,22 @@ def Run(target):
                 rawImage = cv2.polylines(rawImage, [rec], True, (0, 0, 255), thickness=2)
                 rawImage = cv2.line(rawImage, (rec[0][0], rec[0][1]), (rec[2][0], rec[2][1]), (0,0,255), thickness=2)
                 rawImage = cv2.line(rawImage, (rec[1][0], rec[1][1]), (rec[3][0], rec[3][1]), (0,0,255), thickness=2)
+                intcenter = tuple([ int((rec[0][xy] + rec[1][xy] + rec[2][xy] + rec[3][xy])/4) for xy in [0,1]])
+                
+       
             cv2.imwrite("%s/out/%s" % (target, os.path.basename(file)), rawImage)
-            if makeMontage and i % Common.MONTAGE_STEP == 0:
-                mask = np.zeros_like(montage)
-                mask = cv2.fillConvexPoly(mask, np.array([rec]), color=(255, 255, 255))
-                montage = np.where(mask==255, rawImage, montage)
+            
+            if makeMontage and cnt is not None:
+                trajectPoints.append(intcenter)
+                if i % Common.MONTAGE_STEP == 0:
+                    mask = np.zeros_like(montage)
+                    mask = cv2.fillConvexPoly(mask, np.array([rec]), color=(255, 255, 255))
+                    montage = np.where(mask==255, rawImage, montage)
             
     if makeMontage:
         cv2.imwrite(Common.DetectedMontage(target), montage)
+        traject = cv2.polylines(traject, [np.array(trajectPoints)], False, (0,0,2550), thickness=4)
+        cv2.imwrite(Common.Trajectory(target), traject)
 
     if Common.MAKE_DETECTED_MOVIE:
         subprocess.run(["ffmpeg" , "-framerate", "30", 

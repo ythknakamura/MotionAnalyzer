@@ -4,14 +4,14 @@ import json
 SETTING_JSON = "setting.json"
 
 setting = {
-    "fps" : 240,                    # 入力動画のfps
-    "makeDetectedMovie" : True,     # 自動検出後の確認動画を作るかどうか
-    "transposeRaw" : "hflip",       # 入力動画に回転をかけるかどうか
-    "sampleOnCrop" : 2,             # Cropの際の画像の縮小率
-    "motageStep" : 48,              # モンタージュの作成間隔
-    "vLimit" : (-5,5),              # グラフの速度の範囲
-    "aLimit" : (-12, 12),            # グラフの加速度の範囲
-    "graphOut": ["x", "vx", "w", "vw"]
+    "fps" : 240,                   # 入力動画のfps
+    "makeDetectedMovie" : True,    # 自動検出後の確認動画を作るかどうか
+    "transposeRaw" : "hflip",      # 入力動画に回転をかけるかどうか
+    "sampleOnCrop" : 2,            # Cropの際の画像の縮小率
+    "motageStep" : 48,             # モンタージュの作成間隔
+    "vLimit" : (-5,5),             # グラフの速度の範囲
+    "aLimit" : (-12, 12),          # グラフの加速度の範囲
+    "graphOut": ["x", "vx", "w", "vw"]  # グラフ化するもの
     }
 
 ## transposeRawは""か"hflip"か"transpose=2"
@@ -57,6 +57,9 @@ def DetectedMovie(target):
 
 def DetectedMontage(target):
     return os.path.join(target, "%s_detected.jpg"%target)
+
+def Trajectory(target):
+    return os.path.join(target, "%s_trajectory.jpg"%target)
 
 def GraphFile(target):
     return os.path.join(target, "%s_graph.txt"%target)
