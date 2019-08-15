@@ -2,6 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import Common
 
+
+graphElements = [
+    (1, "x",  "x  [m]"), 
+    (2, "vx", "vx [m/s]"), 
+    (3, "ax", "ax [m/s2]"), 
+    (4, "y",  "y  [m]"),
+    (5, "vy", "yv [m/s]"),
+    (6, "ay", "ya [m/s2]"),
+    (7, "w",  "w  [360 deg]"), 
+    (8, "vw", "vw [360 deg/s]"),
+    (9, "aw", "aw [360 deg/s2]")]
+
 def windowLeastSquare(tlist, xlist):
     d1 = np.empty_like(tlist)
     d2 = np.empty_like(tlist)
@@ -40,9 +52,14 @@ reset
 
 ### 表示したいもの以外の行頭に#をつける
 ###################################################
-#tate_label = "x [m]"		;tate_rownum = 2
-tate_label = "v [m/s]"		;tate_rownum = 3
-#tate_label = "a [m/s2]"	;tate_rownum = 4
+#tate_label = "x [m]"		        ;tate_rownum = 2
+tate_label = "v [m/s]"		        ;tate_rownum = 3
+#tate_label = "a [m/s2] "       	;tate_rownum = 4
+#tate_label = "y [m]"	            ;tate_rownum = 5
+#tate_label = "yv [m/s]"	        ;tate_rownum = 6
+#tate_label = "ya [m/s2]"	        ;tate_rownum = 7
+#tate_label = "anlge [360 deg]"	    ;tate_rownum = 8
+#tate_label = "omega [360 deg/s]"	;tate_rownum = 9
 ###################################################
 
 
@@ -86,17 +103,11 @@ set term pop
         f.write(pltString)
 
 def PlotAll(targets):
-    graphElements = [
-            (1, "x [m]"), 
-            (2, "v [m/s]"),
-            (3, "a [m/s2]"),
-            (4, "y [m]"),
-            (5, "angle [360 deg]"), 
-            (6, "omega [360 deg/s]")]
-   
-    for id, ylabel in graphElements:
+    for id, name, ylabel in graphElements:
+        if not name in Common.GRAPH_OUT:
+            continue
+
         fig, ax = plt.subplots(figsize=(8, 6))
-      
         for target in targets:
             with open(Common.GraphFile(target), "r") as graphfile:
                 data = np.loadtxt(graphfile, delimiter="\t")
@@ -109,7 +120,7 @@ def PlotAll(targets):
         ax.set_ylabel(ylabel)
         ax.legend()
         fig.tight_layout()
-        fig.savefig("graphs%d.png"%id)
+        fig.savefig("graphs_%s.png"%name)
         fig.show()
     
 def Run(target, show):
@@ -119,7 +130,7 @@ def Run(target, show):
         tlist = data[:, 0]
         xlist = data[:, 1]
         ylist = data[:, 2]
-        angle_list = np.empty_like(tlist)
+        wlist = np.empty_like(tlist)
 
         # x座標の原点の設定
         xlist = [x - xlist[0] for x in xlist]
@@ -128,55 +139,55 @@ def Run(target, show):
         ylist = [y - ylist[0] for y in ylist]
 
         # 角度の計算
-        angle_list[0] = 0
-        for i in range(1, len(angle_list)):
+        wlist[0] = 0
+        for i in range(1, len(wlist)):
             dr = data[i, 3] - data[i-1, 3]
             if dr > 0.25:
                 dr -= 0.5
             if dr < -0.25:
                 dr += 0.5
-            angle_list[i] = angle_list[i-1] + dr
+            wlist[i] = wlist[i-1] + dr
 
         # 最小２乗法で微分量を計算
-        vlist, alist  = windowLeastSquare(tlist, xlist)
-        omega_list, _ = windowLeastSquare(tlist, angle_list)
+        vxlist, axlist = windowLeastSquare(tlist, xlist)
+        vylist, aylist = windowLeastSquare(tlist, ylist)
+        vwlist, awlist = windowLeastSquare(tlist, wlist)
 
         # 上限値の設定
         if Common.V_LIM is not None:
             vmin, vmax = Common.V_LIM
-            vlist = (np.vectorize(lambda v: v if vmin < v < vmax else np.nan))(vlist)
+            vxlist = (np.vectorize(lambda v: v if vmin < v < vmax else np.nan))(vxlist)
+            vylist = (np.vectorize(lambda v: v if vmin < v < vmax else np.nan))(vylist)
+            vwlist = (np.vectorize(lambda v: v if vmin < v < vmax else np.nan))(vwlist)
         if Common.A_LIM is not None:
             amin, amax = Common.A_LIM
-            alist = (np.vectorize(lambda a: a if amin < a < amax else np.nan))(alist)
-        if Common.O_LIM is not None:
-            omin, omax = Common.O_LIM
-            omega_list = (np.vectorize(lambda o: o if omin < o < omax else np.nan))(omega_list)
+            axlist = (np.vectorize(lambda a: a if amin < a < amax else np.nan))(axlist)
+            aylist = (np.vectorize(lambda a: a if amin < a < amax else np.nan))(aylist)
+            awlist = (np.vectorize(lambda a: a if amin < a < amax else np.nan))(awlist)
+        
 
         # グラフ作成
-        graphElements = [
-            (xlist, "x [m]", vlist, "v [m/s]", "1"),
-            (alist, "a [m/s2]", ylist, "y [m]", "2"),
-            (angle_list, "angle [360 deg]", omega_list, "omega [360 deg/s]", "3")]             
-        for ele in graphElements:
-            fig, axes = plt.subplots(2, 1, figsize=(6, 12), sharex=True, gridspec_kw={'hspace':0.2})
-            axes[0].plot(tlist, ele[0], color='black')
-            axes[0].set_xlim((tlist[0], tlist[-1]))
-            axes[0].grid(True)
-            axes[0].set_ylabel(ele[1])
-            axes[1].plot(tlist, ele[2], color='black')
-            axes[1].grid(True)
-            axes[1].set_ylabel(ele[3])
-            axes[1].set_xlabel("time [s]")
-            fig.suptitle(target + "-" + ele[4])
-            plt.savefig(Common.GraphPng(target, ele[4]))
-            if show:
-                plt.show()
+        plotList = [tlist, xlist, vxlist, axlist, ylist, vylist, aylist, wlist, vwlist, awlist]
+        for id, name, ylabel in graphElements:
+            if not name in Common.GRAPH_OUT:
+                continue
 
+            fig, ax = plt.subplots(figsize=(8, 6))
+        
+            ax.plot(plotList[0], plotList[id], color='black')
+            ax.set_xlim((plotList[0][0], plotList[0][-1]))
+            ax.grid(True)
+            ax.set_xlabel('time [s]')
+            ax.set_ylabel(ylabel)
+            fig.tight_layout()
+            fig.savefig(Common.GraphPng(target, name))
+            if show:
+                fig.show()
+ 
+   
         with open(Common.GraphFile(target), mode='w') as f:
-            output = "# time\t x \t v \t a \t y \t angle \t omega\n"
-            print(output, end="")
+            output = "# time\t x \t vx \t ax \t y \t vy \t ay \t w \t vw \t aw\n"
             f.write(output)
             for i, t in enumerate(tlist):
-                output = "%f\t%f\t%f\t%f\t%f\t%f\t%f\n" %(t, xlist[i], vlist[i], alist[i], ylist[i], angle_list[i], omega_list[i])
-                print(output, end="")
+                output = "%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n" %(t, xlist[i], vxlist[i], axlist[i], ylist[i], vylist[i], aylist[i], wlist[i], vwlist[i], awlist[i])
                 f.write(output)

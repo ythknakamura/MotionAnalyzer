@@ -10,11 +10,12 @@ setting = {
     "sampleOnCrop" : 2,             # Cropの際の画像の縮小率
     "motageStep" : 48,              # モンタージュの作成間隔
     "vLimit" : (-5,5),              # グラフの速度の範囲
-    "aLimit" : (-10, 2),            # グラフの加速度の範囲
-    "oLimit" : (-3,3),              # グラフの角速度の範囲
+    "aLimit" : (-12, 12),            # グラフの加速度の範囲
+    "graphOut": ["x", "vx", "w", "vw"]
     }
 
 ## transposeRawは""か"hflip"か"transpose=2"
+## graphOutは"x", "vx", "ax", "y", "vy", "ay", "w", "vw", "aw"
 
 
 def SaveSetting():
@@ -42,6 +43,7 @@ MONTAGE_STEP = setting.get("motageStep") or 0
 V_LIM = setting.get("vLimit")
 A_LIM = setting.get("aLimit")
 O_LIM = setting.get("oLimit")
+GRAPH_OUT = setting.get("graphOut") or ["x", "vx"]
 
 
 def CalibrationFile(target):
@@ -59,5 +61,5 @@ def DetectedMontage(target):
 def GraphFile(target):
     return os.path.join(target, "%s_graph.txt"%target)
 
-def GraphPng(target, id):
-    return os.path.join(target, "%s_graph%s.png"%(target, id))
+def GraphPng(target, name):
+    return os.path.join(target, "%s_graph_%s.png"%(target, name))
