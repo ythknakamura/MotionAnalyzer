@@ -11,12 +11,13 @@ setting = {
     "motageStep" : 48,             # モンタージュの作成間隔
     "vLimit" : (-5,5),             # グラフの速度の範囲
     "aLimit" : (-12, 12),          # グラフの加速度の範囲
-    "graphOut": ["x", "vx", "w", "vw"]  # グラフ化するもの
+    "graphOut": ["x", "vx", "w", "vw"],  # グラフ化するもの
+    "detectType" : "rectangle"     # 検出対象
     }
 
 ## transposeRawは""か"hflip"か"transpose=2"
 ## graphOutは"x", "vx", "ax", "y", "vy", "ay", "w", "vw", "aw"
-
+## detectTypeは"rectangle"か"circle"
 
 def SaveSetting():
     f = open(SETTING_JSON, "w")
@@ -44,6 +45,7 @@ V_LIM = setting.get("vLimit")
 A_LIM = setting.get("aLimit")
 O_LIM = setting.get("oLimit")
 GRAPH_OUT = setting.get("graphOut") or ["x", "vx"]
+DETECT_TYPE_RECTANGLE = setting.get("detectType")!="circle"
 
 
 def CalibrationFile(target):
